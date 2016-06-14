@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"os"
-
+	"github.com/pivotal-golang/lager"
 	"github.com/go-martini/martini"
+	"net/http"
 )
 
 func main() {
@@ -12,10 +12,11 @@ func main() {
 	if message == "" {
 		message = "Hello world"
 	}
-
+	logger := lager.NewLogger("simple-go-web-app")
+	logger.RegisterSink(lager.NewWriterSink(os.Stdout, lager.INFO))
 	m := martini.Classic()
-	m.Get("/", func() string {
-		fmt.Println(message)
+	m.Get("/", func(req *http.Request) string {
+		logger.Info("Handling request", lager.Data {"request": req.URL})
 		return message
 	})
 	m.Run()
